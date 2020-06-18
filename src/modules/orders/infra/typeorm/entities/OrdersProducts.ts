@@ -1,34 +1,54 @@
 import {
-  Entity,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
-  PrimaryGeneratedColumn,
-  ManyToOne,
+    Entity,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    JoinColumn,
+    PrimaryGeneratedColumn,
+    ManyToOne,
 } from 'typeorm';
 
 import Order from '@modules/orders/infra/typeorm/entities/Order';
 import Product from '@modules/products/infra/typeorm/entities/Product';
+import ColumnNumericTransformer from '@shared/util/ColumnNumericTransformer';
 
+@Entity('orders_products')
 class OrdersProducts {
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  order: Order;
+    @ManyToOne(() => Order, orders => orders.order_products, {
+        eager: true,
+    })
+    @JoinColumn({ name: 'order_id' })
+    order: Order;
 
-  product: Product;
+    @ManyToOne(() => Product, product => product.order_products, {
+        eager: true,
+    })
+    @JoinColumn({ name: 'product_id' })
+    product: Product;
 
-  product_id: string;
+    @Column()
+    product_id: string;
 
-  order_id: string;
+    @Column()
+    order_id: string;
 
-  price: number;
+    @Column('numeric', {
+        precision: 7,
+        transformer: new ColumnNumericTransformer(),
+    })
+    price: number;
 
-  quantity: number;
+    @Column('integer')
+    quantity: number;
 
-  created_at: Date;
+    @CreateDateColumn()
+    created_at: Date;
 
-  updated_at: Date;
+    @UpdateDateColumn()
+    updated_at: Date;
 }
 
 export default OrdersProducts;

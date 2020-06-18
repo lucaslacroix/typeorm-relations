@@ -27,6 +27,7 @@
         "argsIgnorePattern": "_"
       }
     ],
+    "no-console": "off",
     "no-useless-constructor": "off",
     "@typescript-eslint/interface-name-prefix": [
       "error",
@@ -37,6 +38,7 @@
     "@typescript-eslint/camelcase": "off",
     "prettier/prettier": "error",
     "class-methods-use-this": "off",
+    "no-restricted-syntax":"off",
     "import/extensions": [
       "error",
       "ignorePackages",

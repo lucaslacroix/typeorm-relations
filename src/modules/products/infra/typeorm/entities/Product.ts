@@ -1,28 +1,40 @@
 import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+    OneToMany,
 } from 'typeorm';
 
 import OrdersProducts from '@modules/orders/infra/typeorm/entities/OrdersProducts';
+import ColumnNumericTransformer from '@shared/util/ColumnNumericTransformer';
 
+@Entity('products')
 class Product {
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  name: string;
+    @Column()
+    name: string;
 
-  price: number;
+    @Column('numeric', {
+        precision: 7,
+        transformer: new ColumnNumericTransformer(),
+    })
+    price: number;
 
-  quantity: number;
+    @Column('integer')
+    quantity: number;
 
-  order_products: OrdersProducts[];
+    @OneToMany(() => OrdersProducts, ordersProducts => ordersProducts.product)
+    order_products: OrdersProducts[];
 
-  created_at: Date;
+    @CreateDateColumn()
+    created_at: Date;
 
-  updated_at: Date;
+    @UpdateDateColumn()
+    updated_at: Date;
 }
 
 export default Product;

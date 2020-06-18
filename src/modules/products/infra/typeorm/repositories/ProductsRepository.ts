@@ -6,37 +6,76 @@ import IUpdateProductsQuantityDTO from '@modules/products/dtos/IUpdateProductsQu
 import Product from '../entities/Product';
 
 interface IFindProducts {
-  id: string;
+    id: string;
 }
 
 class ProductsRepository implements IProductsRepository {
-  private ormRepository: Repository<Product>;
+    private ormRepository: Repository<Product>;
 
-  constructor() {
-    this.ormRepository = getRepository(Product);
-  }
+    constructor() {
+        this.ormRepository = getRepository(Product);
+    }
 
-  public async create({
-    name,
-    price,
-    quantity,
-  }: ICreateProductDTO): Promise<Product> {
-    // TODO
-  }
+    public async create({
+        name,
+        price,
+        quantity,
+    }: ICreateProductDTO): Promise<Product> {
+        const product = this.ormRepository.create({
+            name,
+            price,
+            quantity,
+        });
 
-  public async findByName(name: string): Promise<Product | undefined> {
-    // TODO
-  }
+        await this.ormRepository.save(product);
 
-  public async findAllById(products: IFindProducts[]): Promise<Product[]> {
-    // TODO
-  }
+        return product;
+    }
 
-  public async updateQuantity(
-    products: IUpdateProductsQuantityDTO[],
-  ): Promise<Product[]> {
-    // TODO
-  }
+    public async findByName(name: string): Promise<Product | undefined> {
+        const findProduct = await this.ormRepository.findOne({
+            where: {
+                name,
+            },
+        });
+
+        return findProduct;
+    }
+
+    public async findAllById(products: IFindProducts[]): Promise<Product[]> {
+        const prods = products.map(product => product.id);
+
+        const findProducts = await this.ormRepository.find({
+            id: In(prods),
+        });
+
+        return findProducts;
+    }
+
+    public async updateQuantity(
+        products: IUpdateProductsQuantityDTO[],
+    ): Promise<Product[]> {
+        const productsId = products.map(product => product.id);
+
+        const findProducts = await this.ormRepository.findByIds(productsId);
+
+        const updatingProducts = findProducts.map(foundProduct => {
+            const update = products.find(p => p.id === foundProduct.id);
+
+            if (!update) {
+                return foundProduct;
+            }
+
+            return {
+                ...foundProduct,
+                quantity: foundProduct.quantity - update.quantity,
+            };
+        });
+
+        await this.ormRepository.save(updatingProducts);
+
+        return updatingProducts;
+    }
 }
 
 export default ProductsRepository;
